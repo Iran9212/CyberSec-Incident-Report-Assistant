@@ -1,0 +1,856 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: CyberSec Incident Report Assistant
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.2.3@1f549adb04dae791e36f4dac3edb5d128a381ed7da3e05c1b3734274e5bf01d6
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: bowenliang123/md_exporter:1.4.100@71e015c278af8ae41b80f88a72f03ef92ad01b8db0c3676eafd3f998c4d57601
+kind: app
+version: 0.3.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: 1748335463589-source-1748523699627-target
+      selected: false
+      source: '1748335463589'
+      sourceHandle: source
+      target: '1748523699627'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 1748523699627-source-1748523800444-target
+      selected: false
+      source: '1748523699627'
+      sourceHandle: source
+      target: '1748523800444'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: 1748523800444-source-1748524099318-target
+      selected: false
+      source: '1748523800444'
+      sourceHandle: source
+      target: '1748524099318'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: 1748524099318-source-1748524167370-target
+      selected: false
+      source: '1748524099318'
+      sourceHandle: source
+      target: '1748524167370'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: tool
+      id: 1748524167370-source-1748689056509-target
+      source: '1748524167370'
+      sourceHandle: source
+      target: '1748689056509'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: tool
+        targetType: end
+      id: 1748689056509-source-1748526218645-target
+      source: '1748689056509'
+      sourceHandle: source
+      target: '1748526218645'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - document
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          label: 日誌檔案
+          max_length: 1
+          options: []
+          required: true
+          type: file-list
+          variable: log_file
+        - label: 分析重點
+          max_length: 48
+          options:
+          - 全面分析
+          - 惡意軟體檢測
+          - 網路入侵
+          - 異常登入
+          - 資料外洩
+          - 系統異常
+          required: false
+          type: select
+          variable: analysis_focus
+        - label: 時間範圍篩選
+          max_length: 48
+          options: []
+          required: false
+          type: text-input
+          variable: time_range
+        - label: 報告嚴重程度
+          max_length: 48
+          options:
+          - Low
+          - Medium
+          - High
+          - Critical
+          - auto
+          required: false
+          type: select
+          variable: severity
+        - label: 報告語言
+          max_length: 48
+          options:
+          - zh-TW
+          - zh-CN
+          - en-US
+          required: false
+          type: select
+          variable: report_language
+        - label: 包含改善建議
+          max_length: 48
+          options:
+          - 'True'
+          - 'False'
+          required: false
+          type: select
+          variable: include_recommendations
+      height: 220
+      id: '1748335463589'
+      position:
+        x: 15.826992942018705
+        y: 264.597150628344
+      positionAbsolute:
+        x: 15.826992942018705
+        y: 264.597150628344
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\nimport hashlib\nimport re\nfrom datetime import datetime,\
+          \ timedelta\nfrom collections import Counter\n\ndef main(log_file, analysis_focus=\"\
+          comprehensive\", time_range=\"\", severity=\"auto\", report_language=\"\
+          zh-TW\", include_recommendations=True):\n    \"\"\"\n    處理上傳的日誌檔案並進行初步分析\n\
+          \    \"\"\"\n    try:\n        # 讀取日誌檔案內容\n        log_content = read_log_file(log_file)\n\
+          \        \n        # 解析日誌內容\n        parsed_logs = parse_log_entries(log_content)\n\
+          \        \n        # 時間範圍篩選\n        if time_range:\n            parsed_logs\
+          \ = filter_by_time_range(parsed_logs, time_range)\n        \n        # 安全事件檢測\n\
+          \        security_events = detect_security_events(parsed_logs, analysis_focus)\n\
+          \        \n        # 統計分析\n        statistics = generate_statistics(security_events,\
+          \ parsed_logs)\n        \n        # 嚴重程度評估\n        if severity == \"auto\"\
+          :\n            assessed_severity = assess_severity(security_events)\n  \
+          \      else:\n            assessed_severity = severity\n        \n     \
+          \   # 生成處理結果\n        processed_data = {\n            \"analysis_id\": generate_analysis_id(log_file.get('name',\
+          \ 'unknown')),\n            \"file_info\": {\n                \"filename\"\
+          : log_file.get('name', 'unknown.log'),\n                \"size\": log_file.get('size',\
+          \ 0),\n                \"upload_time\": datetime.now().isoformat()\n   \
+          \         },\n            \"analysis_config\": {\n                \"focus\"\
+          : analysis_focus,\n                \"time_range\": time_range,\n       \
+          \         \"language\": report_language,\n                \"include_recommendations\"\
+          : include_recommendations\n            },\n            \"log_summary\":\
+          \ {\n                \"total_entries\": len(parsed_logs),\n            \
+          \    \"time_span\": get_time_span(parsed_logs),\n                \"unique_sources\"\
+          : len(set([log.get('source', 'unknown') for log in parsed_logs]))\n    \
+          \        },\n            \"security_events\": security_events,\n       \
+          \     \"statistics\": statistics,\n            \"severity\": assessed_severity,\n\
+          \            \"processing_time\": datetime.now().isoformat(),\n        \
+          \    \"keywords\": extract_security_keywords(log_content)\n        }\n \
+          \       \n        return {\n            \"processed_event\": json.dumps(processed_data,\
+          \ ensure_ascii=False, indent=2)\n        }\n        \n    except Exception\
+          \ as e:\n        return {\n            \"processed_event\": json.dumps({\n\
+          \                \"error\": f\"日誌處理錯誤: {str(e)}\",\n                \"analysis_id\"\
+          : \"ERROR\",\n                \"file_info\": {\"filename\": \"error.log\"\
+          },\n                \"severity\": \"High\",\n                \"processing_time\"\
+          : datetime.now().isoformat()\n            }, ensure_ascii=False, indent=2)\n\
+          \        }\n\ndef read_log_file(log_file):\n    \"\"\"讀取日誌檔案內容\"\"\"\n \
+          \   # 在實際 Dify 環境中，這裡會使用 window.fs.readFile\n    # 此處提供示例處理邏輯\n    if isinstance(log_file,\
+          \ dict) and 'content' in log_file:\n        return log_file['content']\n\
+          \    elif isinstance(log_file, str):\n        return log_file\n    else:\n\
+          \        # 使用 Dify 的檔案讀取 API\n        return str(log_file)\n\ndef parse_log_entries(log_content):\n\
+          \    \"\"\"解析日誌條目\"\"\"\n    entries = []\n    lines = log_content.split('\\\
+          n')\n    \n    for line in lines:\n        if line.strip():\n          \
+          \  entry = parse_single_log_entry(line)\n            if entry:\n       \
+          \         entries.append(entry)\n    \n    return entries\n\ndef parse_single_log_entry(line):\n\
+          \    \"\"\"解析單一日誌條目\"\"\"\n    # 常見日誌格式模式\n    patterns = [\n        # Apache/Nginx\
+          \ 格式\n        r'(?P<ip>\\d+\\.\\d+\\.\\d+\\.\\d+).*\\[(?P<timestamp>[^\\\
+          ]]+)\\].*\"(?P<method>\\w+)\\s+(?P<url>[^\"]*)\".*(?P<status>\\d+)',\n \
+          \       # Windows Event Log 格式\n        r'(?P<timestamp>\\d{4}[-/]\\d{2}[-/]\\\
+          d{2}\\s+\\d{2}:\\d{2}:\\d{2}).*(?P<level>INFO|WARN|ERROR|DEBUG).*(?P<message>.*)',\n\
+          \        # Syslog 格式\n        r'(?P<timestamp>\\w{3}\\s+\\d{1,2}\\s+\\d{2}:\\\
+          d{2}:\\d{2})\\s+(?P<host>\\S+)\\s+(?P<process>\\S+):\\s*(?P<message>.*)',\n\
+          \        # 一般格式\n        r'(?P<timestamp>\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\\
+          d{2}:\\d{2}).*(?P<message>.*)'\n    ]\n    \n    for pattern in patterns:\n\
+          \        match = re.search(pattern, line)\n        if match:\n         \
+          \   return {\n                'raw_line': line,\n                'timestamp':\
+          \ match.groupdict().get('timestamp', ''),\n                'ip': match.groupdict().get('ip',\
+          \ ''),\n                'method': match.groupdict().get('method', ''),\n\
+          \                'url': match.groupdict().get('url', ''),\n            \
+          \    'status': match.groupdict().get('status', ''),\n                'level':\
+          \ match.groupdict().get('level', ''),\n                'host': match.groupdict().get('host',\
+          \ ''),\n                'process': match.groupdict().get('process', ''),\n\
+          \                'message': match.groupdict().get('message', line),\n  \
+          \              'source': 'parsed'\n            }\n    \n    # 如果無法解析，返回原始資料\n\
+          \    return {\n        'raw_line': line,\n        'message': line,\n   \
+          \     'source': 'raw'\n    }\n\ndef detect_security_events(logs, focus):\n\
+          \    \"\"\"檢測安全事件\"\"\"\n    events = []\n    \n    # 定義不同類型的檢測規則\n    detection_rules\
+          \ = {\n        'malware': [\n            r'virus|malware|trojan|ransomware|backdoor',\n\
+          \            r'suspicious.*exe|\\.bat|\\.ps1',\n            r'blocked.*file|quarantine'\n\
+          \        ],\n        'network_intrusion': [\n            r'failed.*login|authentication.*failed',\n\
+          \            r'brute.*force|dictionary.*attack',\n            r'port.*scan|vulnerability.*scan',\n\
+          \            r'ddos|dos.*attack'\n        ],\n        'suspicious_login':\
+          \ [\n            r'login.*fail|logon.*fail',\n            r'invalid.*user|unknown.*user',\n\
+          \            r'multiple.*fail|repeated.*fail',\n            r'admin.*login|root.*login'\n\
+          \        ],\n        'data_exfiltration': [\n            r'large.*transfer|bulk.*download',\n\
+          \            r'database.*export|backup.*download',\n            r'unusual.*traffic|abnormal.*data'\n\
+          \        ],\n        'system_anomaly': [\n            r'system.*error|critical.*error',\n\
+          \            r'service.*stop|process.*crash',\n            r'disk.*full|memory.*leak'\n\
+          \        ]\n    }\n    \n    # 根據分析重點選擇規則\n    if focus == \"comprehensive\"\
+          :\n        active_rules = {k: v for k, v in detection_rules.items()}\n \
+          \   else:\n        active_rules = {focus: detection_rules.get(focus, [])}\n\
+          \    \n    # 檢測事件\n    for log in logs:\n        message = log.get('message',\
+          \ '').lower()\n        for event_type, rules in active_rules.items():\n\
+          \            for rule in rules:\n                if re.search(rule, message,\
+          \ re.IGNORECASE):\n                    events.append({\n               \
+          \         'type': event_type,\n                        'timestamp': log.get('timestamp',\
+          \ ''),\n                        'source': log.get('ip', log.get('host',\
+          \ 'unknown')),\n                        'message': log.get('message', ''),\n\
+          \                        'rule_matched': rule,\n                       \
+          \ 'raw_log': log.get('raw_line', '')\n                    })\n    \n   \
+          \ return events\n\ndef generate_statistics(events, logs):\n    \"\"\"生成統計資料\"\
+          \"\"\n    return {\n        'event_types': dict(Counter([e['type'] for e\
+          \ in events])),\n        'source_ips': dict(Counter([e['source'] for e in\
+          \ events]).most_common(10)),\n        'hourly_distribution': generate_hourly_stats(events),\n\
+          \        'top_rules': dict(Counter([e['rule_matched'] for e in events]).most_common(5))\n\
+          \    }\n\ndef generate_hourly_stats(events):\n    \"\"\"生成每小時統計\"\"\"\n\
+          \    hourly = {}\n    for event in events:\n        timestamp = event.get('timestamp',\
+          \ '')\n        if timestamp:\n            try:\n                hour = timestamp.split('\
+          \ ')[1].split(':')[0] if ' ' in timestamp else '00'\n                hourly[hour]\
+          \ = hourly.get(hour, 0) + 1\n            except:\n                pass\n\
+          \    return hourly\n\ndef assess_severity(events):\n    \"\"\"評估嚴重程度\"\"\
+          \"\n    if not events:\n        return \"Low\"\n    \n    critical_keywords\
+          \ = ['virus', 'malware', 'ransomware', 'data exfiltration', 'admin login']\n\
+          \    high_keywords = ['brute force', 'failed login', 'port scan', 'ddos']\n\
+          \    \n    event_count = len(events)\n    critical_events = sum(1 for e\
+          \ in events if any(kw in e['message'].lower() for kw in critical_keywords))\n\
+          \    high_events = sum(1 for e in events if any(kw in e['message'].lower()\
+          \ for kw in high_keywords))\n    \n    if critical_events > 0 or event_count\
+          \ > 100:\n        return \"Critical\"\n    elif high_events > 10 or event_count\
+          \ > 50:\n        return \"High\"\n    elif event_count > 10:\n        return\
+          \ \"Medium\"\n    else:\n        return \"Low\"\n\ndef extract_security_keywords(content):\n\
+          \    \"\"\"提取安全關鍵字\"\"\"\n    keywords = [\n        'malware', 'virus',\
+          \ 'trojan', 'ransomware', 'phishing', 'ddos',\n        'sql injection',\
+          \ 'xss', 'brute force', 'port scan', 'login fail',\n        'authentication',\
+          \ 'unauthorized', 'suspicious', 'blocked', 'quarantine'\n    ]\n    \n \
+          \   found = []\n    content_lower = content.lower()\n    for keyword in\
+          \ keywords:\n        if keyword in content_lower:\n            found.append(keyword)\n\
+          \    \n    return found\n\ndef generate_analysis_id(filename):\n    \"\"\
+          \"生成分析 ID\"\"\"\n    hash_obj = hashlib.md5(f\"{filename}{datetime.now()}\"\
+          .encode('utf-8'))\n    return f\"LOG-{datetime.now().strftime('%Y%m%d')}-{hash_obj.hexdigest()[:8].upper()}\"\
+          \n\ndef filter_by_time_range(logs, time_range):\n    \"\"\"根據時間範圍篩選日誌\"\"\
+          \"\n    # 簡化實現，實際可以更複雜\n    return logs\n\ndef get_time_span(logs):\n  \
+          \  \"\"\"獲取日誌時間跨度\"\"\"\n    if not logs:\n        return \"無法確定\"\n   \
+          \ \n    timestamps = [log.get('timestamp', '') for log in logs if log.get('timestamp')]\n\
+          \    if timestamps:\n        return f\"從 {min(timestamps)} 到 {max(timestamps)}\"\
+          \n    return \"無法確定\""
+        code_language: python3
+        desc: 資料預處理
+        outputs:
+          processed_event:
+            children: null
+            type: string
+        selected: false
+        title: Code
+        type: code
+        variables:
+        - value_selector:
+          - '1748335463589'
+          - log_file
+          variable: log_file
+        - value_selector:
+          - '1748335463589'
+          - analysis_focus
+          variable: analysis_focus
+        - value_selector:
+          - '1748335463589'
+          - time_range
+          variable: time_range
+        - value_selector:
+          - '1748335463589'
+          - severity
+          variable: severity
+        - value_selector:
+          - '1748335463589'
+          - report_language
+          variable: report_language
+        - value_selector:
+          - '1748335463589'
+          - include_recommendations
+          variable: include_recommendations
+      height: 82
+      id: '1748523699627'
+      position:
+        x: 318.8269929420187
+        y: 264.597150628344
+      positionAbsolute:
+        x: 318.8269929420187
+        y: 264.597150628344
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1748523699627'
+          - processed_event
+        desc: 威脅分析
+        model:
+          completion_params: {}
+          mode: chat
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: 8f4ed0cb-2fb3-4305-affe-14ba5c104a44
+          role: system
+          text: "你是資深的資安分析師，擁有豐富的威脅獵捕和事件回應經驗。你的任務是分析資安事件並提供專業的威脅評估。 \n\n分析時請考慮： \n\
+            1. 攻擊者的可能動機和目標 \n2. 攻擊的技術複雜度 \n3. 潛在的業務影響 \n4. 攻擊的時間軸和持續性 \n5. 相關的威脅情報\
+            \ \n\n請以客觀、專業的角度進行分析，避免過度解讀或臆測。"
+        - id: cd539f45-4df0-442d-8854-a5c189a4551e
+          role: user
+          text: "請分析以下資安事件並提供詳細的威脅評估：\n\n事件詳情：\n{{#1748523699627.processed_event#}}\n\
+            \n請提供以下分析，並以 JSON 格式回應：\n\n{\n  \"threat_analysis\": {\n    \"threat_type\"\
+            : \"具體的威脅類型\",\n    \"attack_category\": \"攻擊分類 (例如: APT, 網路犯罪, 內部威脅等)\"\
+            ,\n    \"sophistication_level\": \"技術複雜度 (低/中/高/APT級別)\",\n    \"threat_actor_profile\"\
+            : \"可能的攻擊者輪廓\",\n    \"attack_vectors\": [\"主要攻擊向量1\", \"主要攻擊向量2\"],\n\
+            \    \"attack_objectives\": [\"可能的攻擊目標1\", \"可能的攻擊目標2\"],\n    \"persistence_methods\"\
+            : [\"持久化方法1\", \"持久化方法2\"],\n    \"data_at_risk\": [\"可能受影響的資料類型\"],\n\
+            \    \"business_impact\": {\n      \"confidentiality\": \"機密性影響評估\",\n\
+            \      \"integrity\": \"完整性影響評估\", \n      \"availability\": \"可用性影響評估\"\
+            ,\n      \"financial_impact\": \"潛在財務影響\",\n      \"reputation_impact\"\
+            : \"聲譽影響評估\"\n    },\n    \"urgency_level\": \"處理緊急程度 (1-5, 5最緊急)\",\n\
+            \    \"recommended_actions\": [\"立即處置建議1\", \"立即處置建議2\"],\n    \"investigation_priorities\"\
+            : [\"調查重點1\", \"調查重點2\"]\n  }\n}\n\n請確保分析基於事實，避免過度推測。如果資訊不足，請明確標註「需要更多資訊」。"
+        selected: false
+        title: LLM
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 118
+      id: '1748523800444'
+      position:
+        x: 621.8269929420187
+        y: 264.597150628344
+      positionAbsolute:
+        x: 621.8269929420187
+        y: 264.597150628344
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: MITRE ATT&CK 對應
+        model:
+          completion_params: {}
+          mode: chat
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: 0001feef-555a-4d3c-b0e6-7334fbf62b14
+          role: system
+          text: '你是 MITRE ATT&CK 框架專家，熟悉所有的戰術 (Tactics)、技術 (Techniques) 和子技術 (Sub-techniques)。
+
+
+            請根據威脅分析結果，準確對應相關的 MITRE ATT&CK 技術。對應時請：
+
+            1. 只選擇最相關和證據充分的技術
+
+            2. 按照攻擊鏈的順序組織技術
+
+            3. 提供每個技術的簡要說明
+
+            4. 標註信心度等級
+
+
+            請使用最新的 MITRE ATT&CK v14 框架。'
+        - id: a54b739d-1554-4237-aeff-7314bcbcded1
+          role: user
+          text: "基於以下威脅分析結果，請對應相關的 MITRE ATT&CK 技術：\n\n威脅分析結果：\n{{#威脅分析.text#}}\n\n\
+            請以 JSON 格式提供 MITRE ATT&CK 對應：\n\n{\n  \"mitre_mapping\": {\n    \"attack_chain_summary\"\
+            : \"攻擊鏈整體描述\",\n    \"kill_chain_phases\": [\n      {\n        \"phase\"\
+            : \"階段名稱\",\n        \"description\": \"階段描述\",\n        \"techniques\"\
+            : [\"T1234\", \"T5678\"]\n      }\n    ],\n    \"techniques\": [\n   \
+            \   {\n        \"id\": \"T1059\",\n        \"name\": \"Command and Scripting\
+            \ Interpreter\",\n        \"tactic\": \"Execution\",\n        \"sub_techniques\"\
+            : [\n          {\n            \"id\": \"T1059.001\",\n            \"name\"\
+            : \"PowerShell\",\n            \"confidence\": \"High\",\n           \
+            \ \"evidence\": \"事件中的具體證據\"\n          }\n        ],\n        \"confidence\"\
+            : \"High\",\n        \"evidence_summary\": \"支持此技術的證據摘要\",\n        \"\
+            detection_methods\": [\"檢測方法1\", \"檢測方法2\"],\n        \"mitigation_references\"\
+            : [\"M1038\", \"M1049\"]\n      }\n    ],\n    \"tactics_timeline\": [\n\
+            \      {\n        \"order\": 1,\n        \"tactic\": \"Initial Access\"\
+            ,\n        \"techniques\": [\"T1566.001\"],\n        \"estimated_time\"\
+            : \"攻擊開始時間或階段\"\n      }\n    ],\n    \"confidence_assessment\": {\n \
+            \     \"overall_confidence\": \"Medium\",\n      \"reasoning\": \"信心度評估的原因\"\
+            \n    }\n  }\n}\n\n請確保：\n1. 只包含有足夠證據支持的技術\n2. 技術 ID 和名稱準確無誤\n3. 信心度評估合理\n\
+            4. 提供具體的檢測和緩解建議"
+        selected: false
+        title: LLM 2
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 118
+      id: '1748524099318'
+      position:
+        x: 924.8269929420187
+        y: 264.597150628344
+      positionAbsolute:
+        x: 924.8269929420187
+        y: 264.597150628344
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1748524099318'
+          - text
+        desc: 報告生成
+        model:
+          completion_params: {}
+          mode: chat
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: d17793ff-f87a-4c2c-83ef-8b8e34093288
+          role: system
+          text: '你是專業的資安報告撰寫專家，能夠產出符合業界標準的資安分析報告。
+
+
+            報告撰寫原則：
+
+            1. 結構清晰、邏輯嚴謹
+
+            2. 技術內容準確、易懂
+
+            3. 建議具體、可執行
+
+            4. 符合合規要求
+
+            5. 適合不同技術層級的讀者
+
+
+            請根據指定語言撰寫報告，確保專業術語使用正確。'
+        - id: 826d1613-45b1-4c2c-bf9e-7c3b1fb3269b
+          role: user
+          text: '請根據以下分析結果生成完整的資安事件分析報告：
+
+
+            原始事件資料：
+
+            {{#1748523699627.processed_event#}}
+
+
+            威脅分析：
+
+            {{#1748523800444.text#}}
+
+
+            MITRE ATT&CK 對應：
+
+            {{#1748524099318.text#}}
+
+
+            報告要求：
+
+            - 語言：根據 processed_event 中的 language 設定
+
+            - 格式：Markdown
+
+            - 長度：完整詳細的專業報告
+
+            - 受眾：資安團隊、管理層、合規部門
+
+
+            報告結構：
+
+
+            # 資安事件分析報告
+
+
+            ## 執行摘要
+
+            [簡潔的事件概述、風險評級、關鍵發現和建議]
+
+
+            ## 事件基本資訊
+
+            - 事件 ID：
+
+            - 發生時間：
+
+            - 事件來源：
+
+            - 嚴重程度：
+
+            - 分析時間：
+
+
+            ## 事件描述
+
+            [詳細的事件描述和時間軸]
+
+
+            ## 威脅分析
+
+            ### 攻擊性質
+
+            [威脅類型、攻擊者輪廓、攻擊目標]
+
+
+            ### 攻擊技術分析
+
+            [具體的攻擊方法和技術細節]
+
+
+            ### 影響評估
+
+            [對機密性、完整性、可用性的影響]
+
+
+            ## MITRE ATT&CK 框架分析
+
+            ### 攻擊鏈分析
+
+            [完整的攻擊鏈描述]
+
+
+            ### 技術對應表
+
+            [表格形式呈現 MITRE 技術對應]
+
+
+            ### 戰術時間軸
+
+            [攻擊各階段的時間軸]
+
+
+            ## 風險評估
+
+            ### 業務風險
+
+            [財務、營運、聲譽等風險]
+
+
+            ### 技術風險
+
+            [系統、資料、網路等風險]
+
+
+            ## 處置建議
+
+            ### 立即行動 (0-24小時)
+
+            [緊急處置步驟]
+
+
+            ### 短期行動 (1-7天)
+
+            [短期改善措施]
+
+
+            ### 長期行動 (1-3個月)
+
+            [長期安全強化]
+
+
+            ## 檢測與監控建議
+
+            [改善檢測能力的具體建議]
+
+
+            ## 預防措施
+
+            [防止類似事件的具體措施]
+
+
+            ## 合規考量
+
+            [相關法規和標準的合規要求]
+
+
+            ## 附錄
+
+            ### 技術細節
+
+            [詳細的技術資訊]
+
+
+            ### 參考資料
+
+            [MITRE ATT&CK 連結、相關資源]
+
+
+            ### 聯絡資訊
+
+            [後續聯絡和支援資訊]
+
+
+            請確保報告專業、完整且易於理解。'
+        selected: false
+        title: LLM 3
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 118
+      id: '1748524167370'
+      position:
+        x: 1227.8269929420187
+        y: 264.597150628344
+      positionAbsolute:
+        x: 1227.8269929420187
+        y: 264.597150628344
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1748524167370'
+          - text
+          variable: text
+        - value_selector:
+          - '1748526160082'
+          - result
+          variable: result
+        - value_selector:
+          - '1748523699627'
+          - processed_event
+          variable: processed_event
+        - value_selector:
+          - '1748689056509'
+          - files
+          variable: files
+        selected: false
+        title: End
+        type: end
+      height: 168
+      id: '1748526218645'
+      position:
+        x: 1828.8269929420187
+        y: 264.597150628344
+      positionAbsolute:
+        x: 1828.8269929420187
+        y: 264.597150628344
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        default_value:
+        - key: text
+          type: string
+          value: ''
+        - key: json
+          type: array[object]
+          value: '[]'
+        desc: ''
+        error_strategy: default-value
+        is_team_authorization: true
+        output_schema: null
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: Markdown text
+            ja_JP: Markdown text
+            pt_BR: Markdown text
+            zh_Hans: Markdown格式文本
+          label:
+            en_US: Markdown text
+            ja_JP: Markdown text
+            pt_BR: Markdown text
+            zh_Hans: Markdown格式文本
+          llm_description: ''
+          max: null
+          min: null
+          name: md_text
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: Filename of the output file
+            ja_JP: Filename of the output file
+            pt_BR: Filename of the output file
+            zh_Hans: 输出文件名
+          label:
+            en_US: Filename of the output file
+            ja_JP: Filename of the output file
+            pt_BR: Filename of the output file
+            zh_Hans: 输出文件名
+          llm_description: ''
+          max: null
+          min: null
+          name: output_filename
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        params:
+          md_text: ''
+          output_filename: ''
+        provider_id: bowenliang123/md_exporter/md_exporter
+        provider_name: bowenliang123/md_exporter/md_exporter
+        provider_type: builtin
+        retry_config:
+          max_retries: 3
+          retry_enabled: false
+          retry_interval: 1000
+        selected: false
+        title: Markdown to PDF file
+        tool_configurations: {}
+        tool_description: A tool for generating PDF file from Markdown text
+        tool_label: Markdown to PDF file
+        tool_name: md_to_pdf
+        tool_parameters:
+          md_text:
+            type: mixed
+            value: '{{#1748524167370.text#}}'
+          output_filename:
+            type: mixed
+            value: 資安分析報告
+        type: tool
+      height: 90
+      id: '1748689056509'
+      position:
+        x: 1531.8269929420187
+        y: 264.597150628344
+      positionAbsolute:
+        x: 1531.8269929420187
+        y: 264.597150628344
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 0.2557063521845748
+      y: 97.76256443449063
+      zoom: 0.8999999999999992
